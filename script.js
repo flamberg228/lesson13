@@ -18,16 +18,11 @@ function getInfo () {
   if(headerInput.value !== ''){
   info = headerInput.value;
   let clons = info;
-  localStorage[clons] = info;
+  localStorage.setItem(clons, info);
+  // console.log(localStorage.lel)
   addBusiness();
-  // for(let i=0; i<localStorage.length; i++){
-  // localStorage[i] = info;
-  // }
   headerInput.value = '';
-  // for(let key in localStorage) {
-  //   let i = i + 1;
-  //   localStorage.key = i;
-  // }
+
  
   }
 }
