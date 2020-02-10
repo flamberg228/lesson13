@@ -15,10 +15,10 @@ console.log(toDoItem.length);
 let info;
 function getInfo () {
   event.preventDefault();
-  if(headerInput.value !== '' ){
+  if(headerInput.value !== ''){
   info = headerInput.value;
+  localStorage[info] = info;
   addBusiness();
-  let counter = 0;
   // for(let i=0; i<localStorage.length; i++){
   // localStorage[i] = info;
   // }
