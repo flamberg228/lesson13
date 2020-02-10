@@ -17,7 +17,8 @@ function getInfo () {
   event.preventDefault();
   if(headerInput.value !== ''){
   info = headerInput.value;
-  localStorage[info] = info;
+  let clons = info;
+  localStorage[clons] = info;
   addBusiness();
   // for(let i=0; i<localStorage.length; i++){
   // localStorage[i] = info;
