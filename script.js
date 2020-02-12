@@ -1,61 +1,126 @@
-let headerInput = document.querySelector('.header-input'),
-    plusButton = document.querySelector('.header-button'),
-    toDoItem = document.querySelectorAll('.todo-item'),
-    toDoRemove = document.querySelectorAll('.todo-remove'),
-    toDoComplete = document.querySelectorAll('.todo-complete'),
-    toDo = document.querySelector('.todo'),
-    toDoCompleted = document.querySelector('.todo-completed'),
-    toDoButtons = document.querySelectorAll('.todo-buttons');
+'use strict';
 
-let clone = toDoItem[0].cloneNode(true);
-// toDo.appendChild(clone);
-toDo.removeChild(toDoItem[0]);
-toDoCompleted.removeChild(toDoItem[1]);
-console.log(toDoItem.length);
-let info;
-function getInfo () {
-  event.preventDefault();
-  if(headerInput.value !== ''){
-  info = headerInput.value;
-  let clons = info;
-  localStorage.setItem(clons, info);
-  // console.log(localStorage.lel)
-  addBusiness();
-  headerInput.value = '';
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.querySelector('.todo-control'),
+        headerInput = document.querySelector('.header-input'),
+        todoList = document.getElementById('todo'),
+        completedList = document.getElementById('completed');
 
- 
+  let data = {
+    todo: [],
+    completed: []
+  };
+
+  if (localStorage.getItem('LocalData')) {
+    data = JSON.parse(localStorage.getItem('LocalData'));
   }
-}
-function addBusiness () {
-  let clone2 = clone.cloneNode(true);
-  clone2.innerHTML = info;
-  let buttonsClone = toDoButtons[0].cloneNode(true);
-  
-  clone2.appendChild(buttonsClone);
-  toDo.appendChild(clone2);
-  buttonsClone.children[0].addEventListener('click', function () {
-  if(clone2.parentNode === toDoCompleted) {
-    toDoCompleted.removeChild(clone2);
-  } else {
-    toDo.removeChild(clone2);
-  }
-  toDoRemove = document.querySelectorAll('.todo-remove');
-  
-  
-  })
-  buttonsClone.children[1].addEventListener('click', function () {
-    toDoRemove = document.querySelectorAll('.todo-remove');
-    if(clone2.parentNode === toDo){
-      toDoCompleted.appendChild(clone2);
-    } else {
-      toDo.appendChild(clone2);
+
+  const renderItemsForUpdate = function () {
+    if (!data.todo.length && !data.completed.length) return;
+    for (let i = 0; i < data.todo.length; i++) {
+      renderItem(data.todo[i]);
     }
-  
-    })
-  // clone2.addEventListener('click', function () {
-  //   toDoRemove = document.querySelectorAll('.todo-remove');
-  //   toDo.removeChild(clone2);
-  //   })
-}
 
-plusButton.addEventListener('click', getInfo)
+    for (let i = 0; i < data.completed.length; i++) {
+      renderItem(data.completed[i], true);
+    }
+  };
+
+  const dataUpdateToLocalS = function () {
+    localStorage.setItem('LocalData', JSON.stringify(data));
+  };
+
+  const addItem = function (text) {
+    renderItem(text);
+    headerInput.value = '';
+    data.todo.push(text);
+
+    dataUpdateToLocalS();
+  };
+
+  const itemRemove = function (elem) {
+    const item = elem.parentNode.parentNode;
+    const itemParent = item.parentNode;
+    const id = itemParent.id;
+    const text = item.textContent;
+
+    if (id === 'todo') {
+      data.todo.splice(data.todo.indexOf(text), 1);
+    } else {
+      data.completed.splice(data.completed.indexOf(text), 1);
+    }
+
+    itemParent.removeChild(item);
+    dataUpdateToLocalS();
+  };
+
+  const itemComplete = function (elem) {
+    const item = elem.parentNode.parentNode;
+    const itemParent = item.parentNode;
+    const id = itemParent.id;
+    const text = item.textContent;
+
+    let target;
+    if (id === 'todo') {
+      target = completedList;
+    } else {
+      target = todoList;
+    }
+    if (id === 'todo') {
+      data.todo.splice(data.todo.indexOf(text), 1);
+      data.completed.push(text);
+    } else {
+      data.completed.splice(data.completed.indexOf(text), 1);
+      data.todo.push(text);
+    }
+
+    itemParent.removeChild(item);
+    target.insertBefore(item, target.childNodes[0]);
+    dataUpdateToLocalS();
+  };
+
+  const renderItem = function (text, completed = false) {
+    const item = document.createElement('li');
+    const btnBlock = document.createElement('div');
+    const btnRemove = document.createElement('button');
+    const btnComplete = document.createElement('button');
+
+    let list = todoList;
+
+    if (completed) {
+      list = completedList;
+    } else {
+      list = todoList;
+    }
+
+    item.classList.add('todo-item');
+    btnBlock.classList.add('todo-buttons');
+    btnRemove.classList.add('todo-remove');
+    btnComplete.classList.add('todo-complete');
+
+    btnRemove.addEventListener('click', function (event) {
+      itemRemove(event.target);
+    });
+
+    btnComplete.addEventListener('click', function (event) {
+      itemComplete(event.target);
+    });
+
+    item.textContent = text;
+
+    btnBlock.appendChild(btnRemove);
+    btnBlock.appendChild(btnComplete);
+    item.appendChild(btnBlock);
+    list.insertBefore(item, list.childNodes[0]);
+  };
+
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    if (headerInput.value !== '') {
+      addItem(headerInput.value.trim());
+    }
+  });
+
+  renderItemsForUpdate();
+});
